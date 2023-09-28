@@ -1,6 +1,7 @@
 //! Implements necessary methods on vectors.
 
 use std::{
+    fmt,
     ops::{
         Add,
         Sub,
@@ -183,5 +184,31 @@ impl<const N: usize> Sub for Vector<N> {
         }
 
         new
+    }
+}
+
+impl<const N: usize> fmt::Display for Vector<N> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut rows = Vec::new();
+        let mut maxlen = 0;
+        for i in 0..N {
+            let row = format!("{:.8}", self[i]);
+            let l = row.len();
+            rows.push(row);
+            if l > maxlen {
+                maxlen = l;
+            }
+        }
+
+        let mut output = String::new();
+        for i in 0..N {
+            output.push_str("[");
+            output.push_str(
+                &format!("{:^i$}", rows[i], i = maxlen + 2)
+            );
+            output.push_str("]\n");
+        }
+
+        write!(f, "{}", output)
     }
 }
