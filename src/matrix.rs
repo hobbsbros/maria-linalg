@@ -60,21 +60,21 @@ impl<const N: usize> Matrix<N> {
     }
 
     /// Swap rows `i` and `j`.
-    fn swap(&mut self, i: usize, j: usize) {
+    fn swaprow(&mut self, i: usize, j: usize) {
         let temp = self.values[i];
         self.values[i] = self.values[j];
         self.values[j] = temp;
     }
 
     /// Scale row `i` by factor `s`.
-    fn scale(&mut self, i: usize, s: f64) {
+    fn scalerow(&mut self, i: usize, s: f64) {
         for j in 0..N {
             self[(i, j)] *= s;
         }
     }
 
     /// Subtract `s` times row `j` from row `i`.
-    fn sub(&mut self, i: usize, j: usize, s: f64) {
+    fn subrow(&mut self, i: usize, j: usize, s: f64) {
         for k in 0..N {
             self[(i, k)] -= s * self[(j, k)];
         }
@@ -82,7 +82,7 @@ impl<const N: usize> Matrix<N> {
 
     /// Returns the inverse of this matrix.
     pub fn inverse(&self) -> Self {
-        let mut output = self.clone();
+        let mut output = *self;
         let mut inverse = Self::identity();
 
         for i in 0..N {
@@ -96,19 +96,19 @@ impl<const N: usize> Matrix<N> {
             }
 
             // Swap largest pivot to working row
-            output.swap(i, j);
-            inverse.swap(i, j);
+            output.swaprow(i, j);
+            inverse.swaprow(i, j);
 
             // Normalize this row
             let s = 1.0 / output[(i, i)];
-            output.scale(i, s);
-            inverse.scale(i, s);
+            output.scalerow(i, s);
+            inverse.scalerow(i, s);
 
             // Subtract this row from all lower rows
             for k in (i + 1)..N {
                 let s = output[(k, i)];
-                output.sub(k, i, s);
-                inverse.sub(k, i, s);
+                output.subrow(k, i, s);
+                inverse.subrow(k, i, s);
             }
         }
 
@@ -117,12 +117,26 @@ impl<const N: usize> Matrix<N> {
         for i in 0..N {
             for j in (i + 1)..N {
                 let s = output[(i, j)];
-                output.sub(i, j, s);
-                inverse.sub(i, j, s);
+                output.subrow(i, j, s);
+                inverse.subrow(i, j, s);
             }
         }
 
         inverse
+    }
+
+    /// Scales a matrix by a provided scalar, returning the new matrix.
+    pub fn scale(&self, scalar: f64) -> Self {
+        let mut newvalues = [[0.0; N]; N];
+        for i in 0..N {
+            for j in 0..N {
+                newvalues[i][j] = scalar * self[(i, j)];
+            }
+        }
+
+        Self {
+            values: newvalues,
+        }
     }
 }
 
