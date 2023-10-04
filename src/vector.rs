@@ -143,6 +143,23 @@ impl<const N: usize> Vector<N> {
 
         child
     }
+
+    /// Determines if this vector is within the element-wise contraints.
+    pub fn check(&self, lower: [Option<f64>; N], upper: [Option<f64>; N]) -> bool {
+        for i in 0..N {
+            if let Some (l) = lower[i] {
+                if self[i] < l {
+                    return false;
+                }
+            } else if let Some (u) = upper[i] {
+                if self[i] > u {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
 }
 
 impl<const N: usize> Index<usize> for Vector<N> {
