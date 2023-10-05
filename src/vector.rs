@@ -162,6 +162,12 @@ impl<const N: usize> Vector<N> {
     }
 }
 
+impl<const N: usize> From<[f64; N]> for Vector<N> {
+    fn from(values: [f64; N]) -> Self {
+        Self::new(values)
+    }
+}
+
 impl<const N: usize> Index<usize> for Vector<N> {
     type Output = f64;
 
