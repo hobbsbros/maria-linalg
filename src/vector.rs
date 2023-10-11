@@ -13,6 +13,7 @@ use std::{
 use rand::{
     random,
     thread_rng,
+    prelude::SliceRandom,
 };
 
 use rand_distr::{
@@ -159,8 +160,8 @@ impl<const N: usize> Vector<N> {
 
             if random::<f64>() < 1.0 / (N as f64) {
                 let mut rng = thread_rng();
-                let v = permitted.choose(&mut rng).unwrap()
-                child[i] = v;
+                let v = permitted.choose(&mut rng).unwrap();
+                child[i] = *v;
             }
         }
 
