@@ -144,6 +144,29 @@ impl<const N: usize> Vector<N> {
         child
     }
 
+    /// Given two discrete vectors, generate a "child" discrete vector.
+    /// This function is useful for *discrete* genetic optimization algorithms.
+    pub fn child_discrete(mother: &Self, father: &Self, permitted: &[f64]) -> Self {
+        let mut child = Self::zero();
+
+        for i in 0..N {
+            // Select gene for child
+            child[i] = if random::<f64>() < 0.5 {
+                mother[i]
+            } else {
+                father[i]
+            };
+
+            if random::<f64>() < 1.0 / (N as f64) {
+                let mut rng = thread_rng();
+                let v = permitted.choose(&mut rng).unwrap()
+                child[i] = v;
+            }
+        }
+
+        child
+    }
+
     /// Determines if this vector is within the element-wise contraints.
     pub fn check(&self, lower: [Option<f64>; N], upper: [Option<f64>; N]) -> bool {
         for i in 0..N {
