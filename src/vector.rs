@@ -175,7 +175,9 @@ impl<const N: usize> Vector<N> {
                 if self[i] < l {
                     return false;
                 }
-            } else if let Some (u) = upper[i] {
+            }
+            
+            if let Some (u) = upper[i] {
                 if self[i] > u {
                     return false;
                 }
