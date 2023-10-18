@@ -27,7 +27,7 @@ use super::Matrix;
 /// Abstracts over a vector of arbitary dimension.
 pub struct Vector<const N: usize> {
     /// Contains the values of this vector.
-    values: [f64; N],
+    pub values: [f64; N],
 }
 
 /// Implements necessary behaviors of a vector.
@@ -191,6 +191,12 @@ impl<const N: usize> Vector<N> {
 impl<const N: usize> From<[f64; N]> for Vector<N> {
     fn from(values: [f64; N]) -> Self {
         Self::new(values)
+    }
+}
+
+impl<const N: usize> From<Vector<N>> for [f64; N] {
+    fn from(vector: Vector<N>) -> Self {
+        vector.values
     }
 }
 
