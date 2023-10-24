@@ -59,6 +59,21 @@ impl<const N: usize> Matrix<N> {
         output
     }
 
+    /// Right-multiplies this matrix by the provided matrix, returning the result.
+    pub fn matmult(&self, matrix: Matrix<N>) -> Matrix<N> {
+        let mut output = Matrix::<N>::zero();
+
+        for i in 0..N {
+            for j in 0..N {
+                for k in 0..N {
+                    output[(i, j)] += self[(i, k)] * matrix[(k, j)];
+                }
+            }
+        }
+
+        output
+    }
+
     /// Swap rows `i` and `j`.
     fn swaprow(&mut self, i: usize, j: usize) {
         let temp = self.values[i];
@@ -168,4 +183,21 @@ impl<const N: usize> Add for Matrix<N> {
 
         new
     }
+}
+
+#[test]
+fn matrix_multiply() {
+    let a = Matrix::new([
+        [1.0, 2.0, 3.0],
+        [4.0, 5.0, 6.0],
+        [7.0, 8.0, 9.0],
+    ]);
+
+    let b = Matrix::new([
+        [9.0, 8.0, 7.0],
+        [6.0, 5.0, 4.0],
+        [3.0, 2.0, 1.0],
+    ]);
+
+    println!("{:#?}", a.matmult(b));
 }
