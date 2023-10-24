@@ -56,11 +56,11 @@ impl<const N: usize> Matrix<N> {
         axis: Vector<3>,
         angle: f64,
     ) -> Matrix<3> {
-        let basis = Vector::<3>::basis();
+        let basis = Matrix::<3>::identity();
         let mut r = [Vector::<3>::zero(); 3];
 
         for i in 0..3 {
-            r[i] = basis[i].rotate(axis, angle);
+            r[i] = basis.column(i).rotate(axis, angle);
         }
 
         Matrix::<3>::new([
@@ -71,18 +71,25 @@ impl<const N: usize> Matrix<N> {
     }
 
     /// Decomposes this matrix into its columns.
-    /// 
-    /// This is useful for determining the axes of a rotated coordinate system.
     pub fn decompose(&self) -> [Vector<N>; N] {
-        let mut basis = [Vector::zero(); N];
+        let mut columns = [Vector::zero(); N];
 
         for i in 0..N {
-            for j in 0..N {
-                basis[j][i] = self[(i, j)];
-            }
+            columns[i] = self.column(i);
         }
 
-        basis
+        columns
+    }
+
+    /// Gets a column of this vector.
+    pub fn column(&self, j: usize) -> Vector<N> {
+        let mut vector = Vector::zero();
+
+        for i in 0..N {
+            vector[i] = self[(i, j)];
+        }
+
+        vector
     }
 
     /// Right-multiplies this matrix by the provided vector, returning the result.
@@ -314,7 +321,7 @@ fn decompose() {
         [3.0, 6.0, 9.0].into(),
     ];
 
-    assert_eq!(a.decompose(), basis);
+    assert_eq!(a.column(0), basis[0]);
 }
 
 #[test]
@@ -324,11 +331,4 @@ fn z_rotation_matrix() {
     let rotation = Matrix::<3>::rotation(axis, 30.0 * 3.141592653 / 180.0);
 
     println!("{}", rotation);
-}
-
-#[test]
-fn decomposition() {
-    let basis = Vector::<3>::basis();
-
-    println!("{:#?}", basis);
 }
