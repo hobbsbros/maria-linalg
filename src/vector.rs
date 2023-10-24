@@ -48,13 +48,9 @@ impl<const N: usize> Vector<N> {
 
     /// Constructs an orthogonal basis of vectors.
     pub fn basis() -> [Self; N] {
-        let mut basis = [Self::zero(); N];
+        let i = Matrix::identity();
 
-        for i in 0..N {
-            basis[i][i] = 1.0;
-        }
-
-        basis
+        i.decompose()
     }
 
     /// Scales a vector by a provided scalar, returning the new vector.
@@ -80,22 +76,6 @@ impl<const N: usize> Vector<N> {
         output
     }
 
-    /// Crosses this vector with another vector.
-    /// 
-    /// *Note*: this is only implemented for `Vector<3>`.
-    /// Otherwise, this returns a zero vector.
-    pub fn cross(&self, other: Self) -> Self {
-        let mut output = Self::zero();
-
-        if N == 3 {
-            output[0] = self[1] * other[2] - self[2] * other[1];
-            output[1] = self[2] * other[0] - self[0] * other[2];
-            output[2] = self[0] * other[1] - self[1] * other[0];
-        }
-
-        output
-    }
-
     /// Takes the norm of a vector.
     pub fn norm(&self) -> f64 {
         let mut output = 0.0;
@@ -105,6 +85,11 @@ impl<const N: usize> Vector<N> {
         }
 
         output.sqrt()
+    }
+
+    /// Returns the unit vector parallel to this vector.
+    pub fn normalize(&self) -> Self {
+        self.scale(1.0 / self.norm())
     }
 
     /// Left-multiplies the provided matrix by the transpose of this vector, returning the result.
@@ -188,6 +173,29 @@ impl<const N: usize> Vector<N> {
     }
 }
 
+impl Vector<3> {
+    /// Rotates this vector by the provided axis by the provided angle
+    ///     using Rodrigues' rotation formula.
+    /// 
+    /// *Note*: the provided angle is in radians.
+    pub fn rotate(&self, axis: Vector<3>, angle: f64) -> Self {
+        let k = axis.normalize();
+
+        self.scale(angle.cos())
+            + k.scale(self.dot(k) * (1.0 - angle.cos()))
+            + k.cross(*self).scale(angle.sin())
+    }
+
+    /// Crosses this vector with another vector.
+    pub fn cross(&self, other: Self) -> Self {
+        let x = self[1] * other[2] - self[2] * other[1];
+        let y = self[2] * other[0] - self[0] * other[2];
+        let z = self[0] * other[1] - self[1] * other[0];
+
+        [x, y, z].into()
+    }
+}
+
 impl<const N: usize> From<[f64; N]> for Vector<N> {
     fn from(values: [f64; N]) -> Self {
         Self::new(values)
@@ -247,7 +255,12 @@ impl<const N: usize> fmt::Display for Vector<N> {
         let mut rows = Vec::new();
         let mut maxlen = 0;
         for i in 0..N {
-            let row = format!("{:.8}", self[i]);
+            let value = self[i];
+            let row = if value >= 0.0 {
+                format!(" {:.8}", value)
+            } else {
+                format!("{:.8}", value)
+            };
             let l = row.len();
             rows.push(row);
             if l > maxlen {
@@ -266,4 +279,10 @@ impl<const N: usize> fmt::Display for Vector<N> {
 
         write!(f, "{}", output)
     }
+}
+
+#[test]
+fn display_vector() {
+    let vec: Vector<3> = [-0.15, 10.0, 1000.0].into();
+    println!("{}", vec);
 }
